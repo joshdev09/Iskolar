@@ -77,6 +77,17 @@ function QuizSettings({ settings, isGenerating, onUpdate, onGenerate }: {
           </div>
         </div>
 
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">
+            Upload File
+          </label>
+          <input
+            type="file"
+            onChange={(e) => onUpdate({ file: e.target.files?.[0] ?? null })}
+            className="block w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:bg-[#E8F5BD] file:text-green-700 file:font-semibold cursor-pointer"
+          />
+        </div>
+
         <button
           onClick={onGenerate}
           disabled={!canGenerate}
