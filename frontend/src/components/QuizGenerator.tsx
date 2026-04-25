@@ -124,7 +124,11 @@ function ShareBanner({ onMultiplayer, onSinglePlayer, isCreatingSession }: {
           onClick={onSinglePlayer}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-gray-100 bg-gray-50 hover:border-gray-200 transition-all cursor-pointer"
         >
-          <span className="text-3xl">🧍</span>
+          <span className="text-3xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </span>
           <span className="font-bold text-[#333333] text-sm">Solo Play</span>
           <span className="text-xs text-gray-400">Practice by yourself</span>
         </button>
@@ -133,7 +137,11 @@ function ShareBanner({ onMultiplayer, onSinglePlayer, isCreatingSession }: {
           disabled={isCreatingSession}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-green-200 bg-[#E8F5BD] hover:bg-[#C7EABB] transition-all cursor-pointer disabled:opacity-60"
         >
-          <span className="text-3xl">👥</span>
+          <span className="text-3xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </span>
           <span className="font-bold text-[#333333] text-sm">
             {isCreatingSession ? "Creating..." : "Multiplayer"}
           </span>
@@ -150,7 +158,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
   const isLastQuestion = currentIndex === quiz.length - 1;
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[500px] flex flex-col justify-between">
+    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-500px flex flex-col justify-between">
       <div>
         <div className="mb-8">
           <div className="flex justify-between text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">
