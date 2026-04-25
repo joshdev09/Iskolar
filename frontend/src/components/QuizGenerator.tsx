@@ -77,17 +77,6 @@ function QuizSettings({ settings, isGenerating, onUpdate, onGenerate }: {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-400">
-            Upload File
-          </label>
-          <input
-            type="file"
-            onChange={(e) => onUpdate({ file: e.target.files?.[0] ?? null })}
-            className="block w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:bg-[#E8F5BD] file:text-green-700 file:font-semibold cursor-pointer"
-          />
-        </div>
-
         <button
           onClick={onGenerate}
           disabled={!canGenerate}
@@ -119,21 +108,31 @@ function ShareBanner({ onMultiplayer, onSinglePlayer, isCreatingSession }: {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mt-30 max-w-2xl mx-auto">
       <h3 className="text-lg font-extrabold text-[#333333] mb-1">Quiz Ready! 🎉</h3>
       <p className="text-sm text-gray-400 mb-6">How would you like to play?</p>
+      
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={onSinglePlayer}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-gray-100 bg-gray-50 hover:border-gray-200 transition-all cursor-pointer"
         >
-          <span className="text-3xl">🧍</span>
+          <span className="text-3xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </span>
           <span className="font-bold text-[#333333] text-sm">Solo Play</span>
           <span className="text-xs text-gray-400">Practice by yourself</span>
         </button>
+        
         <button
           onClick={onMultiplayer}
           disabled={isCreatingSession}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-green-200 bg-[#E8F5BD] hover:bg-[#C7EABB] transition-all cursor-pointer disabled:opacity-60"
         >
-          <span className="text-3xl">👥</span>
+          <span className="text-3xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+            </svg>
+          </span>
           <span className="font-bold text-[#333333] text-sm">
             {isCreatingSession ? "Creating..." : "Multiplayer"}
           </span>
@@ -150,7 +149,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
   const isLastQuestion = currentIndex === quiz.length - 1;
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[500px] flex flex-col justify-between">
+    <div className="bg-white p-8 m-15 rounded-2xl shadow-sm border border-gray-100 min-h-500px flex flex-col justify-between">
       <div>
         <div className="mb-8">
           <div className="flex justify-between text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">
@@ -173,7 +172,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
             return (
               <label key={i} className={`flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${isSelected ? "bg-green-50 border-green-400 shadow-sm" : "bg-white border-gray-100 hover:border-green-100"}`}>
                 <input type="radio" name="quiz-option" checked={isSelected} onChange={() => onSelectOption(option)} className="hidden" />
-                <div className={`w-auto h-auto rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${isSelected ? "border-green-500 bg-green-500 text-white" : "border-gray-200"}`}>
+                <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${isSelected ? "border-green-500 bg-green-500 text-white" : "border-gray-200"}`}>
                   {isSelected && (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -186,6 +185,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
           })}
         </div>
       </div>
+      
       <div className="mt-12 flex items-center justify-between">
         <button disabled={currentIndex === 0} onClick={onPrev} className="px-8 py-3 rounded-xl font-bold text-sm text-gray-400 hover:bg-gray-50 disabled:opacity-0 transition-all cursor-pointer">
           PREVIOUS
@@ -207,10 +207,10 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
 function QuizResults({ score, total, onRetake, onExit }: any) {
   const isPerfect = score === total;
   const isZero = score === 0;
-  const headline = isPerfect ? "👑 Absolute Legend!" : isZero ? "🌑 Ouch... Try Again!" : "Quiz Complete!";
+  const headline = isPerfect ? "👑 Absolute Legend!" : isZero ? "Ouch... Try Again!" : "Quiz Complete!";
 
   return (
-    <div className="bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center max-w-2xl mx-auto">
+    <div className="bg-white p-12 mt-30 rounded-2xl shadow-sm border border-gray-100 text-center max-w-2xl mx-auto">
       <h2 className="text-3xl font-extrabold text-[#333333]">{headline}</h2>
       <div className="my-10">
         <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Final Score</p>
@@ -269,7 +269,6 @@ export function QuizGenerator() {
 
   return (
     <div className="w-full">
-      {/* Cancel button */}
       {quiz && !isFinished && mode !== null && (
         <div className="flex justify-end mb-4">
           <button

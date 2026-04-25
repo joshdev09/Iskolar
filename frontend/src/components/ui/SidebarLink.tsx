@@ -1,12 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
+import type { ReactNode } from "react";
 
 interface SidebarLinkProps {
   to: string;
-  icon: string;
+  icon: ReactNode;
   label: string;
+  /** Called after navigation — used by the mobile drawer to close itself */
+  onNavClick?: () => void;
 }
 
-export function SidebarLink({ to, icon, label }: SidebarLinkProps) {
+export function SidebarLink({ to, icon, label, onNavClick }: SidebarLinkProps) {
   const { pathname } = useLocation();
   const isActive = pathname === to;
 
@@ -16,9 +19,9 @@ export function SidebarLink({ to, icon, label }: SidebarLinkProps) {
         isActive ? "bg-[#C7EABB]" : "bg-[#E8F5BD] hover:bg-[#C7EABB]"
       }`}
     >
-      <Link to={to}>
+      <Link to={to} onClick={onNavClick}>
         <p className="font-inter font-normal text-[#333333] p-4 flex gap-3 items-center">
-          <img src={icon} alt="" width="25" aria-hidden="true" />
+          {icon}
           {label}
         </p>
       </Link>
