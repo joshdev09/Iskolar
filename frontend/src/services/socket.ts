@@ -1,0 +1,30 @@
+import { io, Socket } from "socket.io-client";
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
+
+let socket: Socket | null = null;
+
+export function getSocket(): Socket {
+  if (!socket) {
+    socket = io(SERVER_URL, {
+      autoConnect: false,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
+
+    socket.on("connect_error", (err: Error) => {
+      console.error("[socket] connection error:", err.message);
+    });
+  }
+  return socket;
+}
+
+export function connectSocket(): void {
+  getSocket().connect();
+}
+
+export function disconnectSocket(): void {
+  socket?.disconnect();
+  socket = null;
+}
