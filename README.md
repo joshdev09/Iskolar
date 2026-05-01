@@ -8,6 +8,7 @@ A student web application with AI-powered note organization and quiz generation,
 
 - **Note Organizer** — Upload PDFs, images, or Word docs and get AI-structured notes (summary, key points, action items)
 - **Generate Quiz** — Paste notes or upload a file and get a multiple-choice quiz with scoring and confetti
+- **Note Upload(Like Gdrive)** - It's where you upload your study notes and stuff just like gdrive.
 
 ---
 
