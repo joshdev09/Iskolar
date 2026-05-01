@@ -1,134 +1,219 @@
-import { v4 as uuid } from "uuid";
-import type { QuizSession, QuizItem, Player } from "../frontend/src/types/multiplayer";
+import { createClient } from "@supabase/supabase-js";
+import { randomBytes } from "crypto";
 
-// ─── In-Memory Store ───────────────────────────────────────────────────────────
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
-const sessions = new Map<string, QuizSession>();
-const codeIndex = new Map<string, string>(); // joinCode → sessionId
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+export interface SessionPlayer {
+  id: string;
+  nickname: string;
+  avatar: string;
+  score: number;
+  correctCount: number;
+}
 
-function makeJoinCode(): string {
-  let code: string;
-  do {
-    code = Math.random().toString(36).substring(2, 8).toUpperCase();
-  } while (codeIndex.has(code));
-  return code;
+export interface Session {
+  sessionId: string;
+  joinCode: string;
+  hostId: string;
+  quiz: any[];
+  players: SessionPlayer[];
+  status: "waiting" | "playing" | "finished";
+  currentIndex: number;
+  questionStartedAt: number | null;
+  answeredKeys: string[];
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function generateJoinCode(): string {
+  return randomBytes(3).toString("hex").toUpperCase();
+}
+
+function generateSessionId(): string {
+  return randomBytes(8).toString("hex");
+}
+
+function rowToSession(row: any): Session {
+  return {
+    sessionId: row.id,
+    joinCode: row.join_code,
+    hostId: row.host_id,
+    quiz: row.quiz,
+    players: row.players ?? [],
+    status: row.status,
+    currentIndex: row.current_index,
+    questionStartedAt: row.question_started_at ?? null,
+    answeredKeys: row.answered_keys ?? [],
+  };
 }
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
-export function createSession(hostId: string, quiz: QuizItem[]): QuizSession {
-  const sessionId = uuid();
-  const joinCode = makeJoinCode();
+export async function createSession(hostId: string, quiz: any[]): Promise<Session> {
+  const id = generateSessionId();
+  const joinCode = generateJoinCode();
 
-  const session: QuizSession = {
-    sessionId,
-    joinCode,
-    hostId,
-    quiz,
-    players: [],
-    status: "waiting",
-    currentIndex: 0,
-  };
+  const { data, error } = await supabase
+    .from("sessions")
+    .insert({
+      id,
+      join_code: joinCode,
+      host_id: hostId,
+      quiz,
+      players: [],
+      status: "waiting",
+      current_index: 0,
+      question_started_at: null,
+      answered_keys: [],
+    })
+    .select()
+    .single();
 
-  sessions.set(sessionId, session);
-  codeIndex.set(joinCode, sessionId);
-  return session;
+  if (error) throw new Error(`createSession failed: ${error.message}`);
+  return rowToSession(data);
 }
 
-export function getSession(sessionId: string): QuizSession | null {
-  return sessions.get(sessionId) ?? null;
+export async function getSession(sessionId: string): Promise<Session | null> {
+  const { data, error } = await supabase
+    .from("sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .single();
+
+  if (error || !data) return null;
+  return rowToSession(data);
 }
 
-export function getSessionByCode(joinCode: string): QuizSession | null {
-  const sessionId = codeIndex.get(joinCode.toUpperCase());
-  if (!sessionId) return null;
-  return sessions.get(sessionId) ?? null;
+export async function getSessionByCode(joinCode: string): Promise<Session | null> {
+  const { data, error } = await supabase
+    .from("sessions")
+    .select("*")
+    .eq("join_code", joinCode.toUpperCase())
+    .single();
+
+  if (error || !data) return null;
+  return rowToSession(data);
 }
 
-export function addPlayer(
+export async function updateSession(
+  sessionId: string,
+  patch: {
+    status?: Session["status"];
+    currentIndex?: number;
+    questionStartedAt?: number | null;
+  }
+): Promise<void> {
+  const dbPatch: any = {};
+  if (patch.status !== undefined)            dbPatch.status = patch.status;
+  if (patch.currentIndex !== undefined)      dbPatch.current_index = patch.currentIndex;
+  if (patch.questionStartedAt !== undefined) dbPatch.question_started_at = patch.questionStartedAt;
+
+  const { error } = await supabase.from("sessions").update(dbPatch).eq("id", sessionId);
+  if (error) throw new Error(`updateSession failed: ${error.message}`);
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await supabase.from("sessions").delete().eq("id", sessionId);
+}
+
+// ─── Players ──────────────────────────────────────────────────────────────────
+
+export async function addPlayer(
   sessionId: string,
   player: { id: string; nickname: string; avatar: string }
-): QuizSession | null {
-  const session = sessions.get(sessionId);
+): Promise<Session | null> {
+  const session = await getSession(sessionId);
   if (!session) return null;
 
-  // Prevent duplicate socket IDs (reconnect scenario)
-  const existing = session.players.find((p) => p.id === player.id);
-  if (existing) return session;
+  const newPlayer: SessionPlayer = { ...player, score: 0, correctCount: 0 };
+  const updatedPlayers = [...session.players, newPlayer];
 
-  // Allow rejoin by nickname — restore previous score
-  const byNickname = session.players.find(
-    (p) => p.nickname.toLowerCase() === player.nickname.toLowerCase()
-  );
-  if (byNickname) {
-    byNickname.id = player.id; // update socket id
-    return session;
-  }
+  const { error } = await supabase
+    .from("sessions")
+    .update({ players: updatedPlayers })
+    .eq("id", sessionId);
 
-  const newPlayer: Player = {
-    id: player.id,
-    nickname: player.nickname,
-    avatar: player.avatar,
-    score: 0,
-    answeredCurrent: false,
-  };
-  session.players.push(newPlayer);
+  if (error) return null;
+  session.players = updatedPlayers;
   return session;
 }
 
-export function removePlayer(sessionId: string, playerId: string): QuizSession | null {
-  const session = sessions.get(sessionId);
-  if (!session) return null;
-  session.players = session.players.filter((p) => p.id !== playerId);
-  return session;
-}
-
-export function updateSession(
+export async function updatePlayerId(
   sessionId: string,
-  patch: Partial<QuizSession>
-): QuizSession | null {
-  const session = sessions.get(sessionId);
-  if (!session) return null;
-  Object.assign(session, patch);
-  return session;
+  nickname: string,
+  newSocketId: string
+): Promise<void> {
+  const session = await getSession(sessionId);
+  if (!session) return;
+
+  const updatedPlayers = session.players.map((p) =>
+    p.nickname === nickname ? { ...p, id: newSocketId } : p
+  );
+
+  await supabase.from("sessions").update({ players: updatedPlayers }).eq("id", sessionId);
 }
 
-export function applyAnswer(
+// ─── Scoring ──────────────────────────────────────────────────────────────────
+
+export async function hasPlayerAnswered(
+  sessionId: string,
+  playerId: string,
+  questionIndex: number
+): Promise<boolean> {
+  const session = await getSession(sessionId);
+  if (!session) return false;
+  return session.answeredKeys.includes(`${playerId}:${questionIndex}`);
+}
+
+export async function applyAnswer(
   sessionId: string,
   playerId: string,
   points: number,
-  isCorrect: boolean
-): QuizSession | null {
-  const session = sessions.get(sessionId);
-  if (!session) return null;
-  const player = session.players.find((p) => p.id === playerId);
-  if (player && !player.answeredCurrent) {
-    player.score += points;
-    player.lastAnswerCorrect = isCorrect;
-    player.answeredCurrent = true;
-  }
-  return session;
-}
-
-export function resetAnsweredFlags(sessionId: string): void {
-  const session = sessions.get(sessionId);
+  isCorrect: boolean,
+  questionIndex: number
+): Promise<void> {
+  const session = await getSession(sessionId);
   if (!session) return;
-  session.players.forEach((p) => {
-    p.answeredCurrent = false;
-    p.lastAnswerCorrect = undefined;
-  });
+
+  const key = `${playerId}:${questionIndex}`;
+  if (session.answeredKeys.includes(key)) return;
+
+  const updatedKeys = [...session.answeredKeys, key];
+  const updatedPlayers = session.players.map((p) =>
+    p.id !== playerId ? p : {
+      ...p,
+      score: p.score + points,
+      correctCount: p.correctCount + (isCorrect ? 1 : 0),
+    }
+  );
+
+  const { error } = await supabase
+    .from("sessions")
+    .update({ players: updatedPlayers, answered_keys: updatedKeys })
+    .eq("id", sessionId);
+
+  if (error) throw new Error(`applyAnswer failed: ${error.message}`);
 }
 
-export function deleteSession(sessionId: string): void {
-  const session = sessions.get(sessionId);
-  if (session) codeIndex.delete(session.joinCode);
-  sessions.delete(sessionId);
+export async function allPlayersAnswered(
+  sessionId: string,
+  questionIndex: number
+): Promise<boolean> {
+  const session = await getSession(sessionId);
+  if (!session) return false;
+  const active = session.players.filter((p) => p.nickname !== "__host__");
+  return active.every((p) => session.answeredKeys.includes(`${p.id}:${questionIndex}`));
 }
 
-export function getSortedLeaderboard(sessionId: string) {
-  const session = sessions.get(sessionId);
+export async function getSortedLeaderboard(sessionId: string): Promise<SessionPlayer[]> {
+  const session = await getSession(sessionId);
   if (!session) return [];
   return [...session.players].sort((a, b) => b.score - a.score);
 }
+
+export function resetAnsweredFlags(_sessionId: string): void {}

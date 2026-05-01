@@ -116,32 +116,32 @@ function ShareBanner({ onMultiplayer, onSinglePlayer, isCreatingSession }: {
   isCreatingSession: boolean;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mt-30 max-w-2xl mx-auto">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mt-8 max-w-2xl mx-auto">
       <h3 className="text-lg font-extrabold text-[#333333] mb-1">Quiz Ready! 🎉</h3>
       <p className="text-sm text-gray-400 mb-6">How would you like to play?</p>
-      
+
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={onSinglePlayer}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-gray-100 bg-gray-50 hover:border-gray-200 transition-all cursor-pointer"
         >
           <span className="text-3xl">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
           </span>
           <span className="font-bold text-[#333333] text-sm">Solo Play</span>
           <span className="text-xs text-gray-400">Practice by yourself</span>
         </button>
-        
+
         <button
           onClick={onMultiplayer}
           disabled={isCreatingSession}
           className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-green-200 bg-[#E8F5BD] hover:bg-[#C7EABB] transition-all cursor-pointer disabled:opacity-60"
         >
           <span className="text-3xl">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
             </svg>
           </span>
           <span className="font-bold text-[#333333] text-sm">
@@ -160,7 +160,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
   const isLastQuestion = currentIndex === quiz.length - 1;
 
   return (
-    <div className="bg-white p-8 m-15 rounded-2xl shadow-sm border border-gray-100 min-h-500px flex flex-col justify-between">
+    <div className="bg-white p-8 m-4 rounded-2xl shadow-sm border border-gray-100 min-h-[500px] flex flex-col justify-between">
       <div>
         <div className="mb-8">
           <div className="flex justify-between text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">
@@ -196,7 +196,7 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
           })}
         </div>
       </div>
-      
+
       <div className="mt-12 flex items-center justify-between">
         <button disabled={currentIndex === 0} onClick={onPrev} className="px-8 py-3 rounded-xl font-bold text-sm text-gray-400 hover:bg-gray-50 disabled:opacity-0 transition-all cursor-pointer">
           PREVIOUS
@@ -215,22 +215,64 @@ function ActiveQuiz({ quiz, currentIndex, userAnswers, progressPercent, onSelect
   );
 }
 
-function QuizResults({ score, total, onRetake, onExit }: any) {
+function QuizResults({ score, total, quiz, userAnswers, onRetake, onExit }: any) {
   const isPerfect = score === total;
   const isZero = score === 0;
   const headline = isPerfect ? "👑 Absolute Legend!" : isZero ? "Ouch... Try Again!" : "Quiz Complete!";
+  const [showReview, setShowReview] = useState(false);
 
   return (
-    <div className="bg-white p-12 mt-30 rounded-2xl shadow-sm border border-gray-100 text-center max-w-2xl mx-auto">
+    <div className="bg-white p-12 mt-8 rounded-2xl shadow-sm border border-gray-100 text-center max-w-2xl mx-auto">
       <h2 className="text-3xl font-extrabold text-[#333333]">{headline}</h2>
       <div className="my-10">
         <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Final Score</p>
-        <p className="text-7xl font-black text-green-500">{score}{" "}<span className="text-2xl text-gray-300">/ {total}</span></p>
+        <p className="text-7xl font-black text-green-500">
+          {score}{" "}<span className="text-2xl text-gray-300">/ {total}</span>
+        </p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
         <button onClick={onRetake} className="px-8 py-4 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all uppercase text-xs cursor-pointer">Retake</button>
-        <button onClick={onExit} className="px-12 py-4 bg-[#F53838] text-white rounded-xl font-bold hover:bg-[#F20D0D] shadow-md transition-all uppercase text-xs cursor-pointer">Exit</button>
+        <button onClick={() => setShowReview(!showReview)} className="px-8 py-4 bg-[#E8F5BD] text-[#333333] rounded-xl font-bold hover:bg-[#C7EABB] transition-all uppercase text-xs cursor-pointer">
+          {showReview ? "Hide Review" : "Review Answers"}
+        </button>
+        <button onClick={onExit} className="px-8 py-4 bg-[#F53838] text-white rounded-xl font-bold hover:bg-[#F20D0D] shadow-md transition-all uppercase text-xs cursor-pointer">Exit</button>
       </div>
+
+      {showReview && (
+        <div className="text-left space-y-4 mt-6">
+          <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-400 mb-4">Answer Review</h3>
+          {quiz.map((item: any, i: number) => {
+            const userAnswer = userAnswers[i];
+            const isCorrect = userAnswer === item.correctAnswer;
+            const isSkipped = !userAnswer;
+            return (
+              <div key={i} className={`p-5 rounded-2xl border-2 ${isCorrect ? "bg-green-50 border-green-200" : isSkipped ? "bg-gray-50 border-gray-200" : "bg-red-50 border-red-200"}`}>
+                <div className="flex items-start gap-3 mb-3">
+                  <span className={`text-xs font-black px-2 py-1 rounded-lg shrink-0 ${isCorrect ? "bg-green-100 text-green-700" : isSkipped ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-600"}`}>
+                    {isCorrect ? "✓" : isSkipped ? "—" : "✗"} Q{i + 1}
+                  </span>
+                  <p className="text-sm font-semibold text-[#333333] leading-relaxed">{item.question}</p>
+                </div>
+                <div className="space-y-2 pl-9">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider w-20 shrink-0">Your answer</span>
+                    <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${isSkipped ? "text-gray-400 bg-gray-100" : isCorrect ? "text-green-700 bg-green-100" : "text-red-600 bg-red-100"}`}>
+                      {isSkipped ? "Skipped" : userAnswer}
+                    </span>
+                  </div>
+                  {!isCorrect && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider w-20 shrink-0">Correct</span>
+                      <span className="text-sm font-semibold px-3 py-1 rounded-lg text-green-700 bg-green-100">{item.correctAnswer}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -279,7 +321,12 @@ export function QuizGenerator() {
   const showModeChooser = quiz && !isFinished && !isGenerating && mode === null;
 
   return (
-    <div className="w-full">
+    // FIX: Changed from "w-full" to a proper scrollable container with padding.
+    // The parent <main> has overflow-y-auto + h-full which clips zero-height children.
+    // Adding p-4 pb-12 ensures content is visible and scrollable within that container.
+    <div className="w-full p-4 pb-12">
+
+      {/* Cancel button — only shown when a mode is active */}
       {quiz && !isFinished && mode !== null && (
         <div className="flex justify-end mb-4">
           <button
@@ -310,8 +357,12 @@ export function QuizGenerator() {
         />
       )}
 
+      {/* FIX: Wrapped HostView in a div with pt-2 so it isn't flush against
+          the cancel button and is guaranteed to start at the top of the scroll area */}
       {mode === "multiplayer" && sessionId && joinCode && quiz && (
-        <HostView sessionId={sessionId} joinCode={joinCode} quizLength={quiz.length} />
+        <div className="pt-2">
+          <HostView sessionId={sessionId} joinCode={joinCode} quizLength={quiz.length} />
+        </div>
       )}
 
       {mode === "solo" && quiz && !isFinished && (
@@ -331,6 +382,8 @@ export function QuizGenerator() {
         <QuizResults
           score={score}
           total={quiz.length}
+          quiz={quiz}
+          userAnswers={userAnswers}
           onRetake={handleRetake}
           onExit={handleReset2}
         />
