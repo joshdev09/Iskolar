@@ -7,39 +7,56 @@ interface UseSessionHostOptions {
 }
 
 export function useSessionHost({ sessionId }: UseSessionHostOptions) {
-  const [players, setPlayers]               = useState<Player[]>([]);
-  const [leaderboard, setLeaderboard]       = useState<LeaderboardEntry[]>([]);
+  const [players, setPlayers]                 = useState<Player[]>([]);
+  const [leaderboard, setLeaderboard]         = useState<LeaderboardEntry[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionStartedData | null>(null);
-  const [isPlaying, setIsPlaying]           = useState(false);
-  const [isFinished, setIsFinished]         = useState(false);
+  const [currentIndex, setCurrentIndex]       = useState(0);
+  const [totalQuestions, setTotalQuestions]   = useState(0);
+  const [isPlaying, setIsPlaying]             = useState(false);
+  const [isFinished, setIsFinished]           = useState(false);
   const [finalLeaderboard, setFinalLeaderboard] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     const socket = getSocket();
     connectSocket();
 
-    // Host joins the socket room without a nickname
-    socket.emit("join_session", {
-      sessionId,
-      nickname: "__host__",
-      avatar: "👑",
-    });
+    // Pre-load players from REST in case they joined before host connected
+    fetch(`/api/session/${sessionId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const visible = (data.players ?? []).filter(
+          (p: Player) => p.nickname !== "__host__"
+        );
+        setPlayers(visible);
+        setTotalQuestions(data.quiz?.length ?? 0);
+      })
+      .catch(console.error);
+
+    // BUG FIX: emit host_join on both initial connect AND reconnects
+    const onConnect = () => {
+      socket.emit("host_join", { sessionId });
+    };
+
+    socket.on("connect", onConnect);
+    if (socket.connected) onConnect();
 
     socket.on("player_joined", ({ players: p }: { players: Player[] }) => {
       setPlayers(p.filter((pl) => pl.nickname !== "__host__"));
     });
 
-    socket.on("player_disconnected", () => {
-      // Players stay in leaderboard; just update display
-    });
-
-    socket.on("game_started", (data: QuestionStartedData) => {
-      setCurrentQuestion(data);
+    socket.on("game_started", ({ questions, total }: any) => {
       setIsPlaying(true);
+      setTotalQuestions(total);
+      if (questions?.length > 0) {
+        setCurrentQuestion(questions[0]);
+        setCurrentIndex(0);
+      }
     });
 
-    socket.on("question_started", (data: QuestionStartedData) => {
+    // BUG FIX: host_question_update also carries index — track it for the host view
+    socket.on("host_question_update", (data: QuestionStartedData) => {
       setCurrentQuestion(data);
+      setCurrentIndex(data.index);
     });
 
     socket.on("leaderboard_update", (entries: LeaderboardEntry[]) => {
@@ -53,10 +70,10 @@ export function useSessionHost({ sessionId }: UseSessionHostOptions) {
     });
 
     return () => {
+      socket.off("connect", onConnect);
       socket.off("player_joined");
-      socket.off("player_disconnected");
       socket.off("game_started");
-      socket.off("question_started");
+      socket.off("host_question_update");
       socket.off("leaderboard_update");
       socket.off("game_finished");
     };
@@ -78,6 +95,8 @@ export function useSessionHost({ sessionId }: UseSessionHostOptions) {
     players,
     leaderboard,
     currentQuestion,
+    currentIndex,
+    totalQuestions,
     isPlaying,
     isFinished,
     finalLeaderboard,

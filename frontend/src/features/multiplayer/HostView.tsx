@@ -1,8 +1,6 @@
 import { useSessionHost } from "@/hooks/useSessionHost";
 import { Leaderboard } from "./Leaderboard";
 
-const AVATARS = ["🐯","🦊","🐸","🐼","🦁","🐨","🐙","🦋","🐬","🦄"];
-
 interface HostViewProps {
   sessionId: string;
   joinCode: string;
@@ -14,6 +12,8 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
     players,
     leaderboard,
     currentQuestion,
+    currentIndex,      // ← new field — must destructure or TS may bail silently
+    totalQuestions,    // ← new field
     isPlaying,
     isFinished,
     finalLeaderboard,
@@ -23,20 +23,20 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
   } = useSessionHost({ sessionId });
 
   const shareUrl = `${window.location.origin}/join/${sessionId}`;
-
   const copyLink = () => navigator.clipboard.writeText(shareUrl);
   const copyCode = () => navigator.clipboard.writeText(joinCode);
 
-  // ── Waiting room ─────────────────────────────────────────────────────────────
+  // ── Waiting room ────────────────────────────────────────────────────────────
   if (!isPlaying && !isFinished) {
     return (
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
-        {/* Header */}
+      // FIX: removed mx-auto centering that was collapsing in some layout containers.
+      // Added min-h to guarantee the content is visible even in flex parents.
+      <div className="w-full max-w-2xl mx-auto p-6 space-y-6 min-h-400px">
         <div>
           <h1 className="text-3xl font-extrabold text-[#333333] tracking-tight">
-            ISKOLAR Quiz Generator
+            Quiz Ready!
           </h1>
-          <p className="text-gray-500 text-sm">Quiz hosted — share the code!</p>
+          <p className="text-gray-500 text-sm mt-1">Share the code below to invite players.</p>
         </div>
 
         {/* Join code card */}
@@ -45,7 +45,7 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
             Join Code
           </p>
           <p
-            className="text-6xl font-black text-[#333333] tracking-[0.15em] cursor-pointer"
+            className="text-6xl font-black text-[#333333] tracking-[0.15em] cursor-pointer select-all"
             onClick={copyCode}
             title="Click to copy"
           >
@@ -58,7 +58,7 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
         <div className="flex gap-3">
           <button
             onClick={copyLink}
-            className="flex-1 py-3 rounded-xl bg-white border border-gray-100 text-sm font-bold uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-white border border-gray-200 text-sm font-bold uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
           >
             Copy Link
           </button>
@@ -67,7 +67,7 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
             disabled={players.length === 0}
             className="flex-1 py-3 rounded-xl bg-[#333333] text-white text-sm font-bold uppercase tracking-widest hover:bg-black transition-all disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
           >
-            Start Game
+            {players.length === 0 ? "Waiting for players…" : "Start Game"}
           </button>
         </div>
 
@@ -78,14 +78,14 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
               Players Joined
             </h3>
             <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
-              {players.length} / ∞
+              {players.length} joined
             </span>
           </div>
 
           {players.length === 0 ? (
             <div className="text-center py-8 text-gray-300">
               <p className="text-4xl mb-3">👀</p>
-              <p className="text-sm font-medium">Waiting for players...</p>
+              <p className="text-sm font-medium text-gray-400">Waiting for players…</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -107,16 +107,20 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
     );
   }
 
-  // ── Active game (host view — no answer options, just controls + leaderboard) ──
+  // ── Active game (host view — no answer buttons, just controls + leaderboard) ─
   if (isPlaying && !isFinished) {
+    // Use live totalQuestions if available, fall back to quizLength prop
+    const total = totalQuestions || quizLength;
+    const qIndex = currentQuestion ? currentQuestion.index : currentIndex;
+    const isLastQ = qIndex + 1 >= total;
+
     return (
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
-        {/* Question display */}
+      <div className="w-full max-w-2xl mx-auto p-6 space-y-6 min-h-400px">
         {currentQuestion && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
             <div className="flex justify-between items-center mb-4">
               <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-green-100">
-                Question {currentQuestion.index + 1} / {currentQuestion.total}
+                Question {qIndex + 1} / {total}
               </span>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                 Host view
@@ -138,15 +142,12 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
           </div>
         )}
 
-        {/* Controls */}
         <div className="flex gap-3">
           <button
             onClick={nextQuestion}
             className="flex-1 py-4 rounded-xl bg-[#333333] text-white font-bold uppercase tracking-widest text-sm hover:bg-black transition-all cursor-pointer"
           >
-            {currentQuestion && currentQuestion.index + 1 >= quizLength
-              ? "End Quiz"
-              : "Next Question →"}
+            {isLastQ ? "End Quiz" : "Next Question →"}
           </button>
           <button
             onClick={endSession}
@@ -156,15 +157,16 @@ export function HostView({ sessionId, joinCode, quizLength }: HostViewProps) {
           </button>
         </div>
 
-        {/* Live leaderboard */}
-        {leaderboard.length > 0 && <Leaderboard entries={leaderboard} title="Live Standings" />}
+        {leaderboard.length > 0 && (
+          <Leaderboard entries={leaderboard} title="Live Standings" />
+        )}
       </div>
     );
   }
 
-  // ── Finished ─────────────────────────────────────────────────────────────────
+  // ── Finished ──────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="w-full max-w-2xl mx-auto p-6 min-h-400px">
       <Leaderboard entries={finalLeaderboard} title="Final Results 🏆" showAll />
     </div>
   );

@@ -11,17 +11,27 @@ export function getSocket(): Socket {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
+      // CRITICAL FIX: Use websocket-first to avoid HTTP long-polling fallback
+      // which causes delayed events and desync issues
+      transports: ["websocket", "polling"],
     });
 
-    socket.on("connect_error", (err: Error) => {
+    socket.on("connect_error", (err) => {
       console.error("[socket] connection error:", err.message);
+    });
+
+    socket.on("reconnect", (attempt) => {
+      console.log(`[socket] reconnected after ${attempt} attempt(s)`);
     });
   }
   return socket;
 }
 
 export function connectSocket(): void {
-  getSocket().connect();
+  const s = getSocket();
+  if (!s.connected && !s.active) {
+    s.connect();
+  }
 }
 
 export function disconnectSocket(): void {
